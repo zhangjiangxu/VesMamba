@@ -33,7 +33,7 @@ parser.add_argument('--gpu', type=str,  default='0', help='GPU to use')
 
 
 args = parser.parse_args()
-# 重命名进程名
+
 proc_title = args.exp
 setproctitle.setproctitle(proc_title)
 train_data_path = args.root_path
@@ -87,34 +87,33 @@ if __name__ == "__main__":
     trainloader = DataLoader(db_train, batch_size=batch_size, num_workers=4, pin_memory=True,
                              worker_init_fn=worker_init_fn)
     print("Train dataset number of batch:", len(trainloader))
-    #优化器
+    
     #optimizer = optim.SGD(model.parameters(), lr=base_lr , momentum=0.9, weight_decay=0.0001)
     optimizer = optim.Adam(model.parameters(), lr=base_lr, weight_decay=1e-5)
-    #学习率调度器
-    #创建组合调度器（Warmup + CosineAnnealing）
+    
+    
     total_epochs = max_epoch
     warmup_epochs = 10
-    # Warmup阶段（线性增长）
+    
     warmup_scheduler = LinearLR(
         optimizer,
-        start_factor=0.01,  # 初始学习率=0.01*lr
-        end_factor=1.0,  # warmup结束时达到完整lr
+        start_factor=0.01, 
+        end_factor=1.0, 
         total_iters=warmup_epochs
     )
-    # 余弦退火阶段（主训练）
+    
     """
     cosine_scheduler = CosineAnnealingLR(
         optimizer,
-        T_max=total_epochs - warmup_epochs  # 余弦周期长度
-         # 最小学习率
+        T_max=total_epochs - warmup_epochs 
+        
     )"""
     cosine_scheduler = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(optimizer, T_0=20, T_mult=2, eta_min=0.000001)
-    #组合调度器（PyTorch 1.13+）
+   
     scheduler = SequentialLR(
         optimizer,
         schedulers=[warmup_scheduler, cosine_scheduler],
-        milestones=[warmup_epochs]  # warmup结束后切换
-    )
+        milestones=[warmup_epochs]  
 
 
     writer = SummaryWriter(snapshot_path + '/log')
@@ -151,7 +150,7 @@ if __name__ == "__main__":
             writer.add_scalar('loss/dice_loss', dice_loss, iter_num)
             logging.info('iteration %d/%d : loss : %f, ce_loss: %f, dice_loss: %f, lr: %.6f' %
                          (iter_num, len(trainloader), loss.item(), ce_loss.item(), dice_loss.item(), current_lr))
-        time2 = time.time()  # 记录 epoch 结束时间
+        time2 = time.time()  
         train_time = time2 - time1
 
         print(f'training time: ', train_time)
