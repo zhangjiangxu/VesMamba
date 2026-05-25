@@ -21,16 +21,16 @@ def test_all_case(net, test_path, num_classes, patch_size=(128, 128, 128), strid
         print("image_path:", image_path)
         label_path = os.path.join(test_path, "seg", image_name.replace("data", "seg"))
         print("label_path:", label_path)
-        # 读取原始图像和标签（保留空间信息）
+        
         original_image_sitk = sitk.ReadImage(image_path)
         original_label_sitk = sitk.ReadImage(label_path)
 
-        # 获取图像的空间信息
+        
         origin = original_image_sitk.GetOrigin()
         spacing = original_image_sitk.GetSpacing()
         direction = original_image_sitk.GetDirection()
 
-        # 转换为numpy数组进行处理
+        
         image = sitk.GetArrayFromImage(original_image_sitk).astype(np.float32)
         label = sitk.GetArrayFromImage(original_label_sitk).astype(np.float32)
 
@@ -42,17 +42,17 @@ def test_all_case(net, test_path, num_classes, patch_size=(128, 128, 128), strid
             single_metric = calculate_metric_percase(prediction, label)
         total_metric += np.asarray(single_metric)
         if save_result:
-            # 从numpy数组创建SimpleITK图像
+            
             pred_sitk = sitk.GetImageFromArray(prediction.astype(np.float32))
 
-            # 设置空间信息
+           
             pred_sitk.SetOrigin(origin)
             pred_sitk.SetSpacing(spacing)
             pred_sitk.SetDirection(direction)
 
-            # 创建输出目录（如果不存在）
+            
             os.makedirs(test_save_path, exist_ok=True)
-            # 保存文件
+           
             sitk.WriteImage(pred_sitk, os.path.join(test_save_path, image_name.replace("data", "pre")))
             print("Save result:", os.path.join(test_save_path, image_name.replace("data", "pre")))
         print("=======================================================================================================")
@@ -65,37 +65,24 @@ def test_all_case(net, test_path, num_classes, patch_size=(128, 128, 128), strid
 
 def test_all_case(net, test_path, num_classes, patch_size=(128, 128, 128),
                   stride_xy=64, stride_z=64, save_result=True, test_save_path=None):
-    """
-    测试所有案例并记录每个案例的指标到CSV文件
-
-    参数:
-        net: 神经网络模型
-        test_path: 测试数据路径
-        num_classes: 类别数
-        patch_size: 输入块大小
-        stride_xy: XY方向步长
-        stride_z: Z方向步长
-        save_result: 是否保存预测结果
-        test_save_path: 预测结果保存路径
-    """
-    # 确保保存路径存在
+    
     os.makedirs(test_save_path, exist_ok=True)
 
-    # 创建CSV文件记录结果
+   
     csv_path = os.path.join(test_save_path, "results.csv")
     with open(csv_path, 'w', newline='') as csvfile:
         csv_writer = csv.writer(csvfile)
-        # 写入表头 (移除了敏感性和特异性)
+       
         csv_writer.writerow([
             "Image", "Dice", "JC", "Precision", "Recall",
             "HD", "HD95", "ASSD", "RAVD"
         ])
 
-        # 获取所有测试图像
+        
         image_list = [f for f in os.listdir(os.path.join(test_path, 'data'))
                       if f.endswith(('.nii', '.nii.gz'))]
 
-        # 初始化总指标 (8个指标)
+       
         total_metrics = np.zeros(8)
         num_images = len(image_list)
 
@@ -104,20 +91,20 @@ def test_all_case(net, test_path, num_classes, patch_size=(128, 128, 128),
             image_path = os.path.join(test_path, "data", image_name)
             label_path = os.path.join(test_path, "seg", image_name.replace("data", "seg"))
 
-            # 读取图像和标签
+            
             image_sitk = sitk.ReadImage(image_path)
             label_sitk = sitk.ReadImage(label_path)
 
-            # 获取空间信息
+            
             origin = image_sitk.GetOrigin()
             spacing = image_sitk.GetSpacing()
             direction = image_sitk.GetDirection()
 
-            # 转换为numpy数组
+            
             image_arr = sitk.GetArrayFromImage(image_sitk).astype(np.float32)
             label_arr = sitk.GetArrayFromImage(label_sitk).astype(np.float32)
 
-            # 进行预测
+            
             time1=time.time()
             prediction, _ = test_single_case(
                 net, image_arr, stride_xy, stride_z, patch_size, num_classes
@@ -128,19 +115,19 @@ def test_all_case(net, test_path, num_classes, patch_size=(128, 128, 128),
             break
 
 
-            # 计算指标 (移除了敏感性和特异性)
+            
             if np.sum(prediction) == 0:
                 metrics = (0, 0, 0, 0, 0, 0, 0, 0)
             else:
                 metrics = calculate_metric_percase(prediction, label_arr)
 
-            # 记录指标到CSV
+            
             csv_writer.writerow([image_name] + list(metrics))
 
-            # 累加指标
+            
             total_metrics += np.array(metrics)
 
-            # 保存预测结果
+            
             if save_result:
                 pred_sitk = sitk.GetImageFromArray(prediction.astype(np.float32))
                 pred_sitk.SetOrigin(origin)
@@ -153,11 +140,11 @@ def test_all_case(net, test_path, num_classes, patch_size=(128, 128, 128),
 
             print("===============================")
 
-        # 计算平均指标
+       
         avg_metrics = total_metrics / num_images
         print(f'Average metrics: {avg_metrics}')
 
-        # 写入平均指标
+       
         csv_writer.writerow(["Average"] + list(avg_metrics))
 
     return avg_metrics
@@ -165,7 +152,7 @@ def test_all_case(net, test_path, num_classes, patch_size=(128, 128, 128),
 def test_single_case(net, image, stride_xy, stride_z, patch_size, num_classes=2):
     w, h, d = image.shape
 
-    # if the size of image is less than patch_size, then padding it
+    
     add_pad = False
     if w < patch_size[0]:
         w_pad = patch_size[0]-w
