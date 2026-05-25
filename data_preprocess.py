@@ -1,15 +1,4 @@
-"""
-温医血管数据预处理
-1) 查看数据像素值的分布直方图
-2) 将数据用 zscore标准化，也有用 minmax归一化的做法，不确定那种做法好。 看到有说 zscore标准化可以防止数据规范化时被压缩
 
-3) 统计数据的space
-4) 将数据重采样
-
-5) 将train 数据分patch，剔除掉不包含血管数据的patch。   正负样本不均衡，这样做应该有点用
-6) 
-7)
-"""
 
 import pathlib
 #import ants
@@ -57,22 +46,22 @@ def registration_nii(target_path, save_path):
     # ori_img = sitk.ReadImage(os.path.join(target_path, label_name))
 
     # target_img = sitk.ReadImage(os.path.join(target_path, fix_name))
-    # target_Size = target_img.GetSize()  # 目标图像大小  [x,y,z]
-    # target_Spacing = target_img.GetSpacing()  # 目标的体素块尺寸    [x,y,z]
-    # target_origin = target_img.GetOrigin()  # 目标的起点 [x,y,z]
-    # target_direction = target_img.GetDirection()  # 目标的方向 [冠,矢,横]=[z,y,x]
-    #     # itk的方法进行resample
+    # target_Size = target_img.GetSize()  
+    # target_Spacing = target_img.GetSpacing() 
+    # target_origin = target_img.GetOrigin()  
+    # target_direction = target_img.GetDirection()  
+    
     # resampler = sitk.ResampleImageFilter()
 
-    # #resampler.SetReferenceImage(ori_img)  # 需要重新采样的目标图像
-    #     # 设置目标图像的信息
-    # resampler.SetSize(target_Size)  # 目标图像大小
+    # #resampler.SetReferenceImage(ori_img)  
+   
+    # resampler.SetSize(target_Size)  
     # resampler.SetOutputOrigin(target_origin)
     # resampler.SetOutputDirection(target_direction)
     # resampler.SetOutputSpacing(target_Spacing)
-    #     # 根据需要重采样图像的情况设置不同的dype
+
     # if resamplemethod == sitk.sitkNearestNeighbor:
-    #     resampler.SetOutputPixelType(sitk.sitkUInt8)  # 近邻插值用于mask的，保存uint8
+    #     resampler.SetOutputPixelType(sitk.sitkUInt8)  
     # else:
     #     resampler.SetOutputPixelType(sitk.sitkFloat32)  # 线性插值用于PET/CT/MRI之类的，保存float32
 
