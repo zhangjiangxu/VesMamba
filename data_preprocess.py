@@ -63,11 +63,11 @@ def registration_nii(target_path, save_path):
     # if resamplemethod == sitk.sitkNearestNeighbor:
     #     resampler.SetOutputPixelType(sitk.sitkUInt8)  
     # else:
-    #     resampler.SetOutputPixelType(sitk.sitkFloat32)  # 线性插值用于PET/CT/MRI之类的，保存float32
+    #     resampler.SetOutputPixelType(sitk.sitkFloat32) 
 
     # resampler.SetTransform(sitk.Transform(3, sitk.sitkIdentity))
     # resampler.SetInterpolator(resamplemethod)
-    # itk_img_resampled = resampler.Execute(ori_img)  # 得到重新采样后的图像
+    # itk_img_resampled = resampler.Execute(ori_img)  
     # out_name = label_name.replace('.nii', '.nii.gz')
     # path_name = os.path.join(save_path, out_name)
     # sitk.WriteImage(itk_img_resampled, path_name)
@@ -161,7 +161,7 @@ def fill_hols(path):
 
         
 ## -----------------------------------------------------------------------
-## --- 统计图像的 size, origin、spacing 和 direction 信息 --- ##
+####
 def get_image_info(data_path):
     data_path = pathlib.Path(data_path).resolve()
     assert data_path.exists()
@@ -210,7 +210,7 @@ def get_image_info(data_path):
 
 
 
-## ---  数据的像素值直方图绘制 --- ## 
+
 def get_histograms(data_path):
     data_path = pathlib.Path(data_path).resolve()
     assert data_path.exists()
@@ -221,14 +221,14 @@ def get_histograms(data_path):
     histograms_output_path = os.path.join(data_path, 'histograms')
     os.makedirs(histograms_output_path, exist_ok=True)
 
-    ## --- 像素值统计 --- ##
+   
     pixel_values_list = []
     for image_path in image_filenames:
         image = sitk.GetArrayFromImage(sitk.ReadImage(str(image_path)))
         non_zero_pixel_values = image.flatten()[image.flatten() != 0]  # 排除像素值为0的部分
         pixel_values_list.append(non_zero_pixel_values)
 
-    ## --- 绘制直方图 --- ##
+    
     print("----- start plot histograms -----")
     for i, (image_path, pixel_values) in enumerate(zip(image_filenames, pixel_values_list)):
         plt.figure(figsize=(8, 6))
@@ -241,7 +241,7 @@ def get_histograms(data_path):
         plt.title(title)
         plt.text(0.75, 0.85, f"max pixel = {max_val}", transform=plt.gca().transAxes)
 
-        # 计算均值和方差
+       
         mean_val = np.mean(pixel_values)
         std_val = np.std(pixel_values)
         plt.text(0.75, 0.75, f"mean = {mean_val:.2f}", transform=plt.gca().transAxes)
@@ -255,7 +255,7 @@ def get_histograms(data_path):
 
 
 
-## ----- 0背景去除 ----- ##
+
 def crop_images_and_labels(image_list, label_list, output_path):
     os.makedirs(output_path, exist_ok=True)
     os.makedirs(os.path.join(output_path, 'images'), exist_ok=True)
@@ -265,7 +265,7 @@ def crop_images_and_labels(image_list, label_list, output_path):
         image = sitk.ReadImage(str(image_path))     ## --- W,H,D --- ##
         label = sitk.ReadImage(str(label_path))
         #print(image.GetSize())
-        ##--- 读取方向，原点，空间等信息 ---##
+       
         image_Direction = image.GetDirection()
         image_Origin = image.GetOrigin()
         image_Spacing = image.GetSpacing()
@@ -326,7 +326,7 @@ def remove_zero_background(raw_data_path):
     return output_path
 
 
-## ---  标准化/归一化 --- ##
+
 def zscore_normalize(image_array):
     non_zero_pixels = image_array[image_array != 0]
     mean = np.mean(non_zero_pixels)
@@ -383,18 +383,17 @@ def normalize(input_path, normalization):
 
 
 
-## --- 重采样 --- ##
 
 
 
 
-## --- 滑动分patch --- ##
+
 def pad_to_fit_shape(data, target_shape, pad_way='constant'):
     # Calculate padding in each dimension
     padding = [(0, max(0, target_shape[i] - data.shape[i])) for i in range(len(target_shape))]
     # Pad the data according to the specified padding mode
     if pad_way == 'constant':
-        padded_data = np.pad(data, padding, mode='constant')        ## --- 默认0值填充 --- ##
+        padded_data = np.pad(data, padding, mode='constant')      
     elif pad_way == 'edge':
         padded_data = np.pad(data, padding, mode='edge')
     elif pad_way == 'reflect':
@@ -432,7 +431,7 @@ def split_patch(input_path, HW_stride, D_stride, patch_size=(128, 128, 128), pad
         image = sitk.ReadImage(image_path)
         label = sitk.ReadImage(label_path)
 
-        ##--- 读取方向，原点，空间等信息 ---##
+       
         image_Direction = image.GetDirection()
         image_Origin = image.GetOrigin()
         image_Spacing = image.GetSpacing()
@@ -440,7 +439,7 @@ def split_patch(input_path, HW_stride, D_stride, patch_size=(128, 128, 128), pad
         label_Direction = label.GetDirection()
         label_Origin = label.GetOrigin()
         label_Spacing = label.GetSpacing()
-        ##判断image和label的方向、原点、空间信息是否一致
+        #
         # if image.GetDirection() != label.GetDirection():
         #     raise ValueError("Image and label information (direction) must be the same. "
         #                      f"Error in data: {image_path}, {label_path}")
@@ -457,7 +456,7 @@ def split_patch(input_path, HW_stride, D_stride, patch_size=(128, 128, 128), pad
         D, H, W = image_arry.shape
         print(image_arry.shape)
         D_l, H_l, W_l = label_arry.shape
-        # 判断image和label的大小是否一致
+        
         if (D, H, W) != (D_l, H_l, W_l):
             raise ValueError("Image and label dimensions must be the same."
                              f"Error in data: {image_path}, {label_path}")
@@ -510,7 +509,7 @@ def split_patch(input_path, HW_stride, D_stride, patch_size=(128, 128, 128), pad
     return output_path
 
 
-## --- 根据label的像素筛选patch --- ##
+
 def filter_patches(input_path, threshold):
     input_path = pathlib.Path(input_path).resolve()
     assert input_path.exists()
@@ -553,24 +552,24 @@ def filter_patches(input_path, threshold):
 
 
 
-## --- 划分数据集 --- ##
+#
 
 def split_dataset(train_data_input_path, test_data_input_path):
-    random.seed(42)     ## 设置随机数种子
+    random.seed(42)     
 
-    # 设置路径
+    
     train_images_path = '/home/segmamba/CTA_data_preprocess/train_128_2000/image'
     train_labels_path = '/home/segmamba/CTA_data_preprocess/train_128_2000/label'
     test_images_path = '/home/segmamba/CTA_data_preprocess/val_128_2000/image'
     test_labels_path = '/home/segmamba/CTA_data_preprocess/val_128_2000/label'
 
-    # 创建输出文件夹
+    
     os.makedirs(train_images_path, exist_ok=True)
     os.makedirs(train_labels_path, exist_ok=True)
     os.makedirs(test_images_path, exist_ok=True)
     os.makedirs(test_labels_path, exist_ok=True)
 
-    # 划分训练集数据
+    
     train_data_path = os.path.join(train_data_input_path, 'image')
     train_label_path = os.path.join(train_data_input_path, 'label')
     
@@ -607,7 +606,7 @@ def split_dataset(train_data_input_path, test_data_input_path):
         data_source = os.path.join(train_data_path, data_folder)
         seg_source = os.path.join(train_label_path, f'label-{data_folder[5:]}')
 
-        # 注意：这里的目标路径改为验证集的路径
+        
         data_target = train_images_path
         seg_target = train_labels_path
 
@@ -616,7 +615,7 @@ def split_dataset(train_data_input_path, test_data_input_path):
 
         patches = os.listdir(data_source)
         random.shuffle(patches)
-        selected_patches = patches  # 选择所有文件
+        selected_patches = patches 
 
         for patch in selected_patches:
             patch_source = os.path.join(data_source, patch)
@@ -627,7 +626,7 @@ def split_dataset(train_data_input_path, test_data_input_path):
 
             shutil.copy(patch_source, patch_target)
             shutil.copy(seg_patch_source, seg_patch_target)
-    # 划分测试集数据
+    
     test_data_source = os.path.join(test_data_input_path, 'image')
     test_label_source = os.path.join(test_data_input_path, 'label')
 
@@ -650,21 +649,21 @@ def split_dataset(train_data_input_path, test_data_input_path):
 
 ''''''
 def split_dataset(train_data_input_path, test_data_input_path):
-    random.seed(42)     ## 设置随机数种子
+    random.seed(42)    
 
-    # 设置路径
+    
     train_images_path = '/home/segmamba/CAS2023_data_preprocess/train_128_2000/data'
     train_labels_path = '/home/segmamba/CAS2023_data_preprocess/train_128_2000/mask'
     test_images_path = '/home/segmamba/CAS2023_data_preprocess/val_128_2000/data'
     test_labels_path = '/home/segmamba/CAS2023_data_preprocess/val_128_2000/mask'
 
-    # 创建输出文件夹
+    
     os.makedirs(train_images_path, exist_ok=True)
     os.makedirs(train_labels_path, exist_ok=True)
     os.makedirs(test_images_path, exist_ok=True)
     os.makedirs(test_labels_path, exist_ok=True)
 
-    # 划分训练集数据
+    
     train_data_path = os.path.join(train_data_input_path, 'data')
     train_label_path = os.path.join(train_data_input_path, 'mask')
 
@@ -698,7 +697,7 @@ def split_dataset(train_data_input_path, test_data_input_path):
             shutil.copy(patch_source, patch_target)
             shutil.copy(seg_patch_source, seg_patch_target)
 
-    # 划分测试集数据
+    
     test_data_source = os.path.join(test_data_input_path, 'data')
     test_label_source = os.path.join(test_data_input_path, 'mask')
 
@@ -722,43 +721,43 @@ def split_dataset(train_data_input_path, test_data_input_path):
 
 if __name__ == '__main__':
 
-    # raw_data_path = '/media/ssd1/ly/Vessel/Datasets/WenYi/raw_data'      ## --- raw data 路径, 路径下目录为  WenYi/images ， WenYi/labels --- ##
+    # raw_data_path = '/media/ssd1/ly/Vessel/Datasets/WenYi/raw_data'    
     # preprocess_save_path = '/media/ssd1/ly/Vessel/Datasets/Public/preprocess_data/'
 
-    # get_image_info(raw_data_path)           ## --- 先获取 raw data的信息， 方便后续比较 ---##
-    # get_histograms(raw_data_path)           ## --- 先获取 raw_data的直方图信息 --- ##
+    # get_image_info(raw_data_path)          
+    # get_histograms(raw_data_path)          
 
     print("----- start data preprocess -----")
-    # ## --- 第一步， 0背景去除 --- ##
-    #remove_zero_background_output_path = remove_zero_background(raw_data_path)      ## --- 0背景去除 --- ##
-    # get_image_info(remove_zero_background_output_path)                              ## --- 获取去除 0背景之后的 data 信息 ---##
+    
+    # remove_zero_background_output_path = remove_zero_background(raw_data_path)      
+    # get_image_info(remove_zero_background_output_path)                              
     # #remove_zero_background_output_path = '/media/ssd1/ly/Vessel/Datasets/WenYi/preprocess_data/01_zero_background_removed'
-    # get_histograms(remove_zero_background_output_path)                              ## --- 去除 0背景之后的 后直方图统计 ---##
+    # get_histograms(remove_zero_background_output_path)                              
 
 
-    # ## --- 重采样 根据数据的space 确定重采样后的 space
+    #
     # reasmple_input_path = '/media/ssd1/ly/Vessel/Datasets/WenYi/raw_data/01_zero_background_removed'
     # reasmple(reasmple_input_path, out_space)
 
 
-    ## --- 第二步，minmax归一化  /  zscore标准化 --- ##
+    #
     #normalize_input_path ="/home/segmamba/CAS2023_trainingdataset/"
-    #normalization = "minmax"                                                                            ## ---归一化/标准化方式     zscore / minmax --- ##
-    #normalize_output_path = normalize(normalize_input_path, normalization)                               ## --- minmax归一化  /  zscore标准化 --- ##
-    #get_image_info(normalize_output_path)                                                               ## --- 获取去除 0背景之后的 data 信息 ---##
-    #get_histograms(normalize_output_path)                                                               ## --- 归一化 / 标准化 后直方图统计 ---##
+    #normalization = "minmax"                                                                          
+    #normalize_output_path = normalize(normalize_input_path, normalization)                              
+    #get_image_info(normalize_output_path)                                                              
+    #get_histograms(normalize_output_path)                                                               
 
 
 
-    ##--- 暂定 是否用代码划分 train 和 test 数据 --- ##
+   
 
     split_patch_input_path = "/home/segmamba/CTAall/train"  ## --- normalize_output_path
-    #--- "constant"（常数填充）、"edge"（边缘填充）、"reflect"（反射填充）和"symmetric"（对称反射填充）
+    
     split_patch_out_path = split_patch(split_patch_input_path, HW_stride=96, D_stride=96, patch_size=(128, 128, 128), pad_way = 'constant')
     #get_image_info(split_patch_out_path)
 
 
-    ## --- 根据label中包含血管的像素筛选patch --- ##
+    
     #filter_patches_input_patch = '/home/segmamba/CAS2023_then_split/split_patch_pad_with_constant/64_64_size128/'
 
     #threshold = 2000
@@ -766,7 +765,7 @@ if __name__ == '__main__':
     print(" ----- finish data preprocess -----")
 
 
-    ## --- 使用代码划分train集和test集 --- ##
+    
     #train_data_input_path = '/home/segmamba/CAS2023_filter_threshold_2000/'
     #test_data_input_path = '/home/segmamba/CAS2023_normalized_zscore/'
     #split_dataset(train_data_input_path, test_data_input_path)
