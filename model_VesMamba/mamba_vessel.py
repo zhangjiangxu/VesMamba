@@ -34,26 +34,26 @@ except ImportError:
 class Mamba(nn.Module):
     def __init__(
         self,
-        d_model,         # 模型维度
-        d_state=16,      # 状态维度，默认16
-        d_conv=4,        # 卷积核大小，默认4
-        expand=2,        # 内部维度扩展倍数，默认2
-        dt_rank="auto",  # 时间步长秩，auto时计算为ceil(d_model/16)
-        dt_min=0.001,    # 最小delta时间
-        dt_max=0.1,      # 最大delta时间
-        dt_init="random",  # delta初始化方式
-        dt_scale=1.0,       # delta缩放因子
-        dt_init_floor=1e-4,  # delta初始下限
-        conv_bias=True,       # 卷积层是否加偏置
-        bias=False,           # 线性层是否加偏置
-        use_fast_path=True,  # Fused kernel options   # 是否使用融合内核加速
-        layer_idx=None,      # 当前层索引（用于缓存）
-        device=None,      # 设备类型
-        dtype=None,          # 数据类型
-        bimamba_type="none",     # 双向Mamba类型
-        nslices=5         # 空间分片数
+        d_model,        
+        d_state=16,      
+        d_conv=4,        
+        expand=2,        
+        dt_rank="auto",  
+        dt_min=0.001,    
+        dt_max=0.1,      
+        dt_init="random",  
+        dt_scale=1.0,       
+        dt_init_floor=1e-4,  
+        conv_bias=True,       
+        bias=False,          
+        use_fast_path=True,  
+        layer_idx=None,      
+        device=None,      
+        dtype=None,          
+        bimamba_type="none",     
+        nslices=5        
     ):
-        # 设备与数据类型配置
+      
         factory_kwargs = {"device": device, "dtype": dtype}
         super().__init__()
         self.d_model = d_model
