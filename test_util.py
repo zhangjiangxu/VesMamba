@@ -9,7 +9,7 @@ import torch.nn.functional as F
 from tqdm import tqdm
 import SimpleITK as sitk
 import time
-'''
+
 def test_all_case(net, test_path, num_classes, patch_size=(128, 128, 128), stride_xy=64, stride_z=64, save_result=True, test_save_path=None):
     total_metric = 0.0
     image_list = [f for f in os.listdir(os.path.join(test_path, 'data'))
@@ -148,7 +148,7 @@ def test_all_case(net, test_path, num_classes, patch_size=(128, 128, 128),
         csv_writer.writerow(["Average"] + list(avg_metrics))
 
     return avg_metrics
-
+    '''
 def test_single_case(net, image, stride_xy, stride_z, patch_size, num_classes=2):
     w, h, d = image.shape
 
