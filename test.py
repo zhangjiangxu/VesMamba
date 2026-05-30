@@ -153,7 +153,7 @@ if __name__ == '__main__':
         print('使用 attention_unet 模型')
         net = AttentionUnet(
         spatial_dims=3,
-        in_channels=1,  # 3D医学图像
+        in_channels=1,  
         out_channels=2,
         channels=[48, 96, 192, 384],
         strides=[2, 2, 2, 2],
